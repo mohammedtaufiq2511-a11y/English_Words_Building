@@ -6170,7 +6170,19 @@ if('speechSynthesis' in window){
   window.speechSynthesis.onvoiceschanged = () => { voicesReady = true; };
 }
 
-function speak(text){
+async function speak(text){
+  // Android app (Capacitor) me native Text-to-Speech use karo
+  try {
+    if(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()){
+      if(!window.__nativeTTS) window.__nativeTTS = Capacitor.registerPlugin('TextToSpeech');
+      try { await window.__nativeTTS.stop(); } catch(e){}
+      await window.__nativeTTS.speak({ text: text, lang: 'en-US', rate: 0.85, pitch: 1.0, volume: 1.0, category: 'ambient' });
+      return;
+    }
+  } catch(e){
+    alert('Voice nahi chal rahi. Phone ki Settings me "Text-to-speech output" me Google Text-to-speech select/install karo.');
+    return;
+  }
   if(!('speechSynthesis' in window)){
     alert('Sorry, this browser does not support voice pronunciation.');
     return;
